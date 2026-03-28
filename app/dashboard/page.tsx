@@ -7,17 +7,11 @@ import IcoBoardView from "@/public/icons/IcoBoard.svg";
 import ListComponent from "@/components/ListComponent";
 import BoardComponent from "@/components/BoardComponent";
 import { useTaskContext } from "@/app/context/TaskContext";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import TaskFilters from "@/components/TaskFilters";
 import SearchBar from "@/components/SearchBar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,

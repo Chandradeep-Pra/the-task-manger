@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import { useLocalStorage } from "@/app/hooks/useLocalStorage";
 
 export type TaskStatus = "To-Do" | "In-Progress" | "Completed" | string;

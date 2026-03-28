@@ -2,7 +2,7 @@
 
 import React, { useMemo, useCallback } from "react";
 import TaskBoard from "./TaskBoard";
-import { useTaskContext } from "@/app/context/TaskContext";
+import { useTaskContext, TaskItem, TaskStatus } from "@/app/context/TaskContext";
 
 const statusOrder = ["To-Do", "In-Progress", "Completed"] as const;
 
@@ -10,10 +10,15 @@ const BoardComponent = () => {
   const { filteredTasks, moveTask } = useTaskContext();
 
   const tasksByStatus = useMemo(() => {
-    const buckets = { "To-Do": [], "In-Progress": [], Completed: [] } as Record<string, any[]>;
+    const buckets: Record<TaskStatus, TaskItem[]> = {
+      "To-Do": [],
+      "In-Progress": [],
+      Completed: [],
+    };
     filteredTasks.forEach((task) => {
-      buckets[task.status] = buckets[task.status] ?? [];
-      buckets[task.status].push(task);
+      const statusKey = task.status as TaskStatus;
+      if (!buckets[statusKey]) buckets[statusKey] = [];
+      buckets[statusKey].push(task);
     });
     return buckets;
   }, [filteredTasks]);

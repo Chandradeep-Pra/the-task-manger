@@ -4,7 +4,12 @@ import { Button } from "./ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import { useTaskContext } from "@/app/context/TaskContext";
 
-const EditTaskDialog = ({ task, onClose }) => {
+interface EditTaskDialogProps {
+  task: import("@/app/context/TaskContext").TaskItem;
+  onClose?: () => void;
+}
+
+const EditTaskDialog = ({ task, onClose }: EditTaskDialogProps) => {
   const { updateTask } = useTaskContext();
   const [formState, setFormState] = useState({
     title: task.title,
@@ -15,7 +20,7 @@ const EditTaskDialog = ({ task, onClose }) => {
 
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormState({ ...formState, [e.target.name]: e.target.value });
   };
 

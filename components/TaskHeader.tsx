@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Sort from "@/public/icons/sort.svg";
 
 export default function TaskHeader() {

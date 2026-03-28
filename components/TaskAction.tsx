@@ -13,7 +13,11 @@ import EditTaskDialog from "./EditTaskDialog";
 import Edit from "@/public/icons/edit.svg";
 import Delete from "@/public/icons/delete.svg";
 
-const TaskAction = ({ task }) => {
+interface TaskActionProps {
+  task: import("@/app/context/TaskContext").TaskItem;
+}
+
+const TaskAction = ({ task }: TaskActionProps) => {
   const { deleteTask } = useTaskContext();
   const [open, setOpen] = useState(false);
 

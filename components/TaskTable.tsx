@@ -1,13 +1,9 @@
 "use client";
 
-import { Calendar, ChevronUp, Ellipsis, GripVertical, Plus } from "lucide-react";
+import { GripVertical, ChevronUp } from "lucide-react";
 import React, { useMemo, useState } from "react";
 import { SlideDown } from "react-slidedown";
 import "react-slidedown/lib/slidedown.css";
-
-import VerticalGrip from "@/public/icons/verticalGrip.svg";
-import RightTick from "@/public/icons/rightTick.svg";
-import Enter from "@/public/icons/enter.svg";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
@@ -27,7 +23,6 @@ interface TaskTableProps {
 const TaskTable = ({ title, color, tasks, onDrop, onDragOver, onDragLeave, isDragOver }: TaskTableProps) => {
   const { addTask, toggleComplete } = useTaskContext();
   const [isOpen, setIsOpen] = useState(true);
-  const [showNewTask, setShowNewTask] = useState(false);
   const [newTask, setNewTask] = useState({
     title: "",
     dueOn: "",
@@ -71,7 +66,6 @@ const TaskTable = ({ title, color, tasks, onDrop, onDragOver, onDragLeave, isDra
     }
 
     setError("");
-    setShowNewTask(false);
     setNewTask({ title: "", dueOn: "", status: "To-Do", category: "work" });
   };
 

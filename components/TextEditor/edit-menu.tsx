@@ -1,6 +1,11 @@
 import React from 'react'
+import { Editor } from '@tiptap/react'
 
-const EditMenu = ({editor}) => {
+interface EditMenuProps {
+  editor: Editor | null
+}
+
+const EditMenu = ({ editor }: EditMenuProps) => {
 
     if(!editor) return null
   return (
