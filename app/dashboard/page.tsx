@@ -1,28 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { ChangeEvent, useState } from "react";
 
 import IcoListView from "@/public/icons/IcoList.svg";
 import IcoBoardView from "@/public/icons/IcoBoard.svg";
 import ListComponent from "@/components/ListComponent";
 import BoardComponent from "@/components/BoardComponent";
+import { useTaskContext } from "@/app/context/TaskContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import TaskFilters from "@/components/TaskFilters";
 import SearchBar from "@/components/SearchBar";
 import { Button } from "@/components/ui/button";
@@ -40,25 +29,69 @@ import AddTaskDialog from "@/components/AddTaskDialog";
 // import {ListViewIco} from "@/public/icons/IcoList.svg"
 
 export default function Dashboard() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
+  const { theme, setTheme, addTask, toast } = useTaskContext();
   const [view, setView] = useState("list");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  type AddTaskForm = {
+    title: string;
+    description: string;
+    dueOn: string;
+    status: "To-Do" | "In-Progress" | "Completed";
+    category: "work" | "personal" | "other";
+  };
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push("/"); // Redirect to home if not logged in
+  const [formState, setFormState] = useState<AddTaskForm>({
+    title: "",
+    description: "",
+    dueOn: "",
+    status: "To-Do",
+    category: "work",
+  });
+  const [error, setError] = useState("");
+
+  const handleDialogChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormState((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleCreateTask = () => {
+    const result = addTask({
+      title: formState.title,
+      description: formState.description,
+      dueOn: formState.dueOn,
+      status: formState.status,
+      category: formState.category,
+      attachment: null,
+    });
+
+    if (!result.success) {
+      setError(result.message ?? "Failed to create task");
+      return;
     }
-  }, [user, loading, router]);
 
-  if (loading) return <div>Loading...</div>;
+    setError("");
+    setDialogOpen(false);
+    setFormState({ title: "", description: "", dueOn: "", status: "To-Do", category: "work" });
+  };
+
+  const handleCancel = () => {
+    setDialogOpen(false);
+    setError("");
+  };
 
   return (
     <div className="font-primary px-0">
+      {toast && (
+        <div className="fixed top-4 right-4 z-50 w-auto max-w-sm animate-fade-in rounded-lg p-3 shadow-xl border border-border bg-card text-foreground">
+          <p className={`text-sm font-medium ${toast.type === "success" ? "text-green-500" : toast.type === "error" ? "text-red-500" : "text-blue-500"}`}>
+            {toast.message}
+          </p>
+        </div>
+      )}
       {/* View Switch */}
-      <div className="w-full md:flex gap-4 items-center hidden px-4 py-2">
+      <div className="w-full md:flex gap-4 items-center hidden px-4 py-2 text-muted-foreground">
         <span
           className={`flex items-center gap-1 cursor-pointer ${
-            view != "list" && "text-gray-600"
+            view != "list" && "text-muted-foreground"
           }`}
           onClick={() => setView("list")}
         >
@@ -67,13 +100,19 @@ export default function Dashboard() {
         </span>
         <span
           className={`flex items-center gap-1 ${
-            view != "board" && "text-gray-600"
+            view != "board" && "text-muted-foreground"
           } cursor-pointer`}
           onClick={() => setView("board")}
         >
           {" "}
           <IcoBoardView className="h-4 w-4" /> <span>Board</span>{" "}
         </span>
+        <button
+          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          className="ml-auto rounded-full border px-3 py-1 text-sm"
+        >
+          {theme === "light" ? "Dark Mode" : "Light Mode"}
+        </button>
       </div>
       <div className="h-screen p-4">
         <div className="flex justify-between  py-2">
@@ -87,9 +126,9 @@ export default function Dashboard() {
               <span>Filter by:</span>
               <TaskFilters />
             </div>
-            <Dialog >
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-primary text-white rounded-full px-4 cursor-pointer">
+                <Button className="bg-primary text-primary-foreground rounded-full px-4 cursor-pointer">
                   {"Add Task".toUpperCase()}
                 </Button>
               </DialogTrigger>
@@ -100,16 +139,16 @@ export default function Dashboard() {
                       Create Task
                     </DialogTitle>
                   </DialogHeader>
-                  <AddTaskDialog />
+                  <AddTaskDialog formState={formState} onChange={handleDialogChange} error={error} />
                 </div>
-                <DialogFooter className="bg-[#F1F1F1] px-4 h-full rounded-b-md"  >
+                <DialogFooter className="bg-card px-4 h-full rounded-b-md"  >
                   <div className="flex gap-4 py-2 justify-end">
-                    <DialogClose asChild>
-
-                  <Button variant="outline" className="px-4 py-2 rounded-full">CANCEL</Button>
-                    </DialogClose>
-                  <Button variant="default" className="px-4 py-2 rounded-full">CREATE</Button>
-
+                    <Button variant="outline" onClick={handleCancel} className="px-4 py-2 rounded-full">
+                      CANCEL
+                    </Button>
+                    <Button variant="default" onClick={handleCreateTask} className="px-4 py-2 rounded-full">
+                      CREATE
+                    </Button>
                   </div>
                 </DialogFooter>
               </DialogContent>

@@ -2,23 +2,20 @@
 
 import React from "react";
 import Image from "next/image";
-import { useAuth } from "../context/AuthContext";
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth(); // Get user from AuthContext
-
   return (
     <div className="w-full">
       {/* Header */}
-      <header className="flex justify-between items-center p-4 md:bg-white bg-[#FAEEFC] shadow-md md:shadow-none">
+      <header className="flex justify-between items-center p-4 bg-sidebar text-sidebar-foreground shadow-md md:shadow-none">
         {/* Logo Section */}
         <div className="flex gap-1 items-center">
           <Image src="/icons/clipboard.svg" width={32} height={32} alt="icon" />
-          <span className="text-pBlack font-semibold text-2xl">TaskBuddy</span>
+          <span className="text-sidebar-primary font-semibold text-2xl">TaskBuddy</span>
         </div>
 
         {/* User Profile Section */}
-        {user && (
+        {/* {user && (
           <div className="flex items-center gap-3">
             <Image
               src={user.photoURL || "/default-avatar.png"}
@@ -27,9 +24,9 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               alt="User Profile"
               className="rounded-full"
             />
-            <span className="text-lg text-gray-600 font-medium hidden md:block">{user.displayName?.split(" ")[0]}</span>
+            <span className="text-lg text-sidebar-foreground font-medium hidden md:block">{user.displayName?.split(" ")[0]}</span>
           </div>
-        )}
+        )} */}
       </header>
 
       {/* Page Content */}

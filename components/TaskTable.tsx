@@ -1,7 +1,7 @@
 "use client";
 
-import { Calendar, ChevronDown, ChevronUp, Ellipsis, Plus, PlusCircle } from "lucide-react";
-import { useState } from "react";
+import { Calendar, ChevronUp, Ellipsis, GripVertical, Plus } from "lucide-react";
+import React, { useMemo, useState } from "react";
 import { SlideDown } from "react-slidedown";
 import "react-slidedown/lib/slidedown.css";
 
@@ -9,147 +9,191 @@ import VerticalGrip from "@/public/icons/verticalGrip.svg";
 import RightTick from "@/public/icons/rightTick.svg";
 import Enter from "@/public/icons/enter.svg";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./ui/select";
 import TaskAction from "./TaskAction";
+import { useTaskContext } from "@/app/context/TaskContext";
 
-const TaskTable = ({ title, color, tasks }) => {
+interface TaskTableProps {
+  title: "To-Do" | "In-Progress" | "Completed";
+  color: string;
+  tasks: Array<{ id: string; title: string; description?: string; category: string; dueOn: string; status: string; attachment?: string | null }>; 
+  onDrop: (event: React.DragEvent<HTMLDivElement>, destinationStatus: "To-Do" | "In-Progress" | "Completed") => void;
+  onDragOver: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragLeave: () => void;
+  isDragOver: boolean;
+}
+
+const TaskTable = ({ title, color, tasks, onDrop, onDragOver, onDragLeave, isDragOver }: TaskTableProps) => {
+  const { addTask, toggleComplete } = useTaskContext();
   const [isOpen, setIsOpen] = useState(true);
   const [showNewTask, setShowNewTask] = useState(false);
   const [newTask, setNewTask] = useState({
     title: "",
     dueOn: "",
-    status: "",
-    category: "",
+    status: "To-Do",
+    category: "work",
   });
+  const [error, setError] = useState("");
 
-  const handleInputChange = (e) => {
+  const count = useMemo(() => tasks.length, [tasks]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setNewTask({ ...newTask, [e.target.name]: e.target.value });
   };
 
+  const handleSelectChange = (field: "status" | "category", value: string) => {
+    setNewTask((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleAddTask = async () => {
+    const { title, dueOn } = newTask;
+    if (!title.trim()) {
+      setError("Task title cannot be empty");
+      return;
+    }
+    if (!dueOn.trim()) {
+      setError("Due date is required");
+      return;
+    }
+    const result = addTask({
+      title: newTask.title,
+      description: "",
+      category: newTask.category,
+      dueOn: newTask.dueOn,
+      status: title === "" ? "To-Do" : newTask.status,
+      attachment: null,
+    });
+
+    if (!result.success) {
+      setError(result.message || "Failed to add task");
+      return;
+    }
+
+    setError("");
+    setShowNewTask(false);
+    setNewTask({ title: "", dueOn: "", status: "To-Do", category: "work" });
+  };
+
   return (
-    <div className="rounded-2xl overflow-hidden mt-2 mb-4 bg-[#F1F1F1]">
-      {/* Header Section */}
+    <div className="rounded-2xl overflow-hidden mt-2 mb-4 bg-card border border-border">
       <div
         className={`flex justify-between items-center cursor-pointer ${color} py-2 px-4`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <h2 className="text-lg font-semibold">
-          {title} ({tasks.length})
+          {title} ({count})
         </h2>
         <button
-          className={`text-xl transition-transform duration-300 ${
-            isOpen ? "rotate-0" : "rotate-180"
-          }`}
+          className={`text-xl transition-transform duration-300 ${isOpen ? "rotate-0" : "rotate-180"}`}
         >
           <ChevronUp />
         </button>
       </div>
 
-      {/* SlideDown Animation for Expand/Collapse */}
       <SlideDown className="duration-100">
         {isOpen && (
-          <table className="w-full mt-2 border-collapse text-sm mx-2">
-            <tbody>
-              {title == "To-Do" && (
-                <tr
-                  className="hidden md:table-row    border-b border-gray-200 cursor-pointer"
-                  onClick={() => setShowNewTask(!showNewTask)}
+          <div className="p-3">
+            {title === "To-Do" && (
+              <div className="mb-3 rounded-xl border border-border bg-popover p-3">
+                <div className="flex flex-nowrap gap-2 items-center overflow-x-auto">
+                  <input
+                    name="title"
+                    placeholder="Task title"
+                    value={newTask.title}
+                    onChange={handleInputChange}
+                    className="border rounded-lg px-3 py-2 flex-1 min-w-[180px]"
+                  />
+                  <Input
+                    type="date"
+                    name="dueOn"
+                    value={newTask.dueOn}
+                    onChange={handleInputChange}
+                    className="rounded-lg"
+                  />
+                  <Select
+                    value={newTask.status}
+                    onValueChange={(value) => handleSelectChange("status", value)}
+                  >
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="To-Do">To-Do</SelectItem>
+                      <SelectItem value="In-Progress">In-Progress</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={newTask.category}
+                    onValueChange={(value) => handleSelectChange("category", value)}
+                  >
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue placeholder="Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="work">work</SelectItem>
+                      <SelectItem value="personal">personal</SelectItem>
+                      <SelectItem value="other">other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button onClick={handleAddTask} className="rounded-full px-4 py-2">
+                    Add
+                  </Button>
+                </div>
+                {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+              </div>
+            )}
+
+            <div className="overflow-auto">
+              <div className="w-full min-w-[600px] border border-border rounded-lg text-sm">
+                <div className="grid grid-cols-[5fr_1fr_1fr_1fr_2fr] bg-popover text-muted-foreground font-semibold text-xs md:text-sm">
+                  <div className="p-2">Task</div>
+                  <div className="p-2 hidden md:block">Due</div>
+                  <div className="p-2 hidden md:block">Status</div>
+                  <div className="p-2 hidden md:block">Category</div>
+                  <div className="p-2 text-right">Actions</div>
+                </div>
+                <div
+                  onDragOver={(event) => onDragOver(event)}
+                  onDrop={(event) => onDrop(event, title)}
+                  onDragLeave={onDragLeave}
+                  className={`flex flex-col rounded-lg transition-all ${isDragOver ? "ring-2 ring-primary/70 ring-offset-2" : ""}`}
                 >
-                  <td className="p-2 flex gap-1 items-center ml-20 hover:bg-primary/20 rounded-full transition-colors duration-300  w-1/10">
-                    <Plus className="text-primary" />
-                    <span>ADD TASK</span>
-                  </td>
-                </tr>
-              )}
-
-              {showNewTask && (
-                <tr className="border-b border-gray-20 ">
-                  <td className="p-2 flex flex-col  gap-2 w-full  ml-20">
-                    <div className="w-full flex gap-4">
-                      <input
-                        type="text"
-                        name="title"
-                        placeholder="Task Title"
-                        value={newTask.title}
-                        onChange={handleInputChange}
-                        className="border p-1 rounded-full w-1/4"
-                      />
-                      <div className="rounded-full ml-4 flex items-center gap-2 text-gray-500 border border-gray-300 px-4 py-2">
-                        <Calendar size={16} />
-                        <span>Add date</span>
-                      </div>
-                      <div className="w-1/6 flex justify-center items-center">
-
-                      <PlusCircle className="self-center justify-center text-gray-500" />
-                      </div>
-                      <div className="w-1/6 flex justify-center items-center">
-
-                      <PlusCircle className="self-center justify-center text-gray-500" />
-                      </div>
-                      {/* <select
-                        name="status"
-                        value={newTask.status}
-                        onChange={handleInputChange}
-                        className="border p-1 rounded w-1/6"
-                      >
-                        <option value="">Status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
-                      </select> */}
-                      {/* <input
-                        type="text"
-                        name="category"
-                        placeholder="Category"
-                        value={newTask.category}
-                        onChange={handleInputChange}
-                        className="border p-1 rounded w-1/6"
-                      /> */}
-                    </div>
-                    <div className="flex gap-2 items-center">
-                       <Button variant="default" className="p-2 flex items-center gap-2 rounded-full" ><span>ADD</span> <Enter  /> </Button>
-                       <span className="font-semibold">CANCEL</span>    
-                    </div>
-                  </td>
-                </tr>
-              )}
-
-              {tasks.map((task, index) => (
-                <tr
-                  key={task.id}
-                  className="border-b border-gray-200 flex items-center" draggable
-                >
-                  <td className="p-2 flex items-center gap-2 md:w-1/3 w-full">
-                    <input
-                      type="checkbox"
-                      className="accent-[var(--color-primary)]"
-                    />
-                    <div className="hidden md:block cursor-grab">
-                      <VerticalGrip />
-                    </div>
+                  {tasks.map((task) => (
                     <div
-                      className={
-                        title == "Completed"
-                          ? "text-success-green"
-                          : "text-[#A7A7A7]"
-                      }
+                      key={task.id}
+                      draggable
+                      onDragStart={(event) => {
+                        event.dataTransfer.setData("text/plain", task.id);
+                        event.dataTransfer.effectAllowed = "move";
+                      }}
+                      className="grid grid-cols-[5fr_1fr_1fr_1fr_2fr] gap-0 border-b border-border bg-background dark:bg-input/40 transition-all hover:bg-muted/10"
                     >
-                      <RightTick />
+                      <div className="p-2 flex items-center gap-2">
+                        <span className="cursor-grab p-1 rounded hover:bg-muted/70 dark:hover:bg-muted/50" title="Drag to move">
+                          <GripVertical size={16} />
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={task.status === "Completed"}
+                          onChange={() => toggleComplete(task.id)}
+                          className="accent-primary"
+                        />
+                        <span className={task.status === "Completed" ? "line-through" : ""}>{task.title}</span>
+                      </div>
+                      <div className="p-2 hidden md:block">{task.dueOn}</div>
+                      <div className="p-2 hidden md:block">{task.status}</div>
+                      <div className="p-2 hidden md:block capitalize">{task.category}</div>
+                      <div className="p-2 text-right flex justify-end items-center">
+                        <TaskAction task={task} />
+                      </div>
                     </div>
-                    <span className={`${title == "Completed" && "line-through"}`}>{task.title}</span>
-                  </td>
-                  <td className="p-2 w-1/6 hidden md:block">{task.dueOn}</td>
-                  <td className="p-2 w-1/6 hidden md:block   rounded px-2 text-xs">
-                  <span className="bg-[#DDDADD] p-2 rounded-sm text-md font-semibold">
-
-                    {task.status.toUpperCase()}
-                  </span>
-                  </td>
-                  <td className="p-2 w-1/6 hidden md:block capitalize">{task.category}</td>
-                  <td className=" hidden  mr-10 w-1/6 md:flex justify-end"> <TaskAction task={task} /> </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </SlideDown>
     </div>
@@ -157,3 +201,4 @@ const TaskTable = ({ title, color, tasks }) => {
 };
 
 export default TaskTable;
+

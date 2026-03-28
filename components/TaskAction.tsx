@@ -1,40 +1,50 @@
+"use client";
+
+import React, { useState } from "react";
 import { Ellipsis } from "lucide-react";
-import React from "react";
+import { useTaskContext } from "@/app/context/TaskContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-
-import Edit from "@/public/icons/edit.svg";
-import Delete from "@/public/icons/delete.svg";
 import { Dialog, DialogContent, DialogHeader, DialogTrigger } from "./ui/dialog";
 import EditTaskDialog from "./EditTaskDialog";
+import Edit from "@/public/icons/edit.svg";
+import Delete from "@/public/icons/delete.svg";
 
-const TaskAction = ({task}) => {
+const TaskAction = ({ task }) => {
+  const { deleteTask } = useTaskContext();
+  const [open, setOpen] = useState(false);
+
   return (
-    <div>
+    <div className="relative">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Ellipsis size={16} />
+          <button className="p-1 text-muted-foreground hover:text-primary">
+            <Ellipsis size={16} />
+          </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="absolute -right-1 -top-2 rounded-xl px-4">
-          <Dialog>
+        <DropdownMenuContent className="absolute -right-1 -top-2 rounded-xl px-4 bg-popover text-popover-foreground shadow-lg border border-border">
+          <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <span className="inline-flex gap-2 items-center hover:scale-110 cursor-pointer">
+              <div className="inline-flex gap-2 items-center hover:scale-110 cursor-pointer">
                 <Edit />
                 <span>Edit</span>
-              </span>
+              </div>
             </DialogTrigger>
             <DialogContent>
-                <DialogHeader ></DialogHeader>
-              <EditTaskDialog task={task} />
+              <DialogHeader />
+              <EditTaskDialog task={task} onClose={() => setOpen(false)} />
             </DialogContent>
           </Dialog>
-          <span className="inline-flex gap-2 items-center hover:scale-110 cursor-pointer text-[#DA2F2F]">
+          <button
+            className="inline-flex gap-2 items-center hover:scale-110 cursor-pointer text-destructive"
+            onClick={() => deleteTask(task.id)}
+          >
             <Delete />
             <span>Delete</span>
-          </span>
+          </button>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

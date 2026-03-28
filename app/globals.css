@@ -59,6 +59,11 @@
   --popover-foreground:oklch(0.985 0 0);
   --primary:oklch(0.922 0 0);
   --primary-foreground:oklch(0.205 0 0);
+  --color-pBlack: #D1D1D1;
+  --color-pink-300: #F2C2E8;
+  --color-blue-300: #7FC5DA;
+  --color-green-300: #9DE6A1;
+  --color-success-green: #8BEB86;
   --secondary:oklch(0.269 0 0);
   --secondary-foreground:oklch(0.985 0 0);
   --muted:oklch(0.269 0 0);

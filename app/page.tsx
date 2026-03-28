@@ -2,18 +2,8 @@
 
 import Circle from "@/components/Circle";
 import Image from "next/image";
-import { googleSignIn } from "./login/client";
-import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const router = useRouter();
-
-  const handleSignIn = async () => {
-    const user = await googleSignIn();
-    if (user) {
-      router.push("/dashboard"); // ✅ Redirect after successful login
-    }
-  };
   return (
     <div className="flex flex-col  md:flex-row h-screen font-urbanist">
       <Circle radius={80} className="absolute left-70 bottom-10 md:hidden" />
@@ -33,15 +23,15 @@ export default function Home() {
           Streamline your workflow and track progress effortlessly with our
           all-in-one task management app.
         </span>
-        <button className="flex w-auto self-center md:self-start items-center  gap-2 px-6 py-2 bg-pBlack rounded-2xl cursor-pointer hover:scale-110 transition-all duration-300 ease-in-out mt-4" onClick={handleSignIn}>
+        <button className="flex w-auto self-center md:self-start items-center gap-2 px-6 py-2 bg-primary rounded-2xl text-primary-foreground cursor-pointer hover:bg-primary/90 transition-all duration-300 ease-in-out mt-4" onClick={() => window.location.href = "/dashboard"}>
           <Image
-            src="./icons/google.svg"
+            src="./icons/clipboard.svg"
             height={22}
             width={22}
-            alt="google sign in"
+            alt="go to dashboard"
           />
-          <span className="text-lg text-white font-normal">
-            Continue with Google
+          <span className="text-lg font-normal">
+            Go to Dashboard
           </span>
         </button>
 

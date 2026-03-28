@@ -1,46 +1,64 @@
 "use client";
-import { useState } from "react";
+
+import { useTaskContext } from "@/app/context/TaskContext";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-} from "@/components/ui/select";
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "./ui/dropdown-menu";
+
+const statuses = ["All", "To-Do", "In-Progress", "Completed"] as const;
+const categories = ["All", "work", "personal", "other"] as const;
 
 export default function TaskFilters() {
-  const [category, setCategory] = useState(""); // Task category
-  const [dueDate, setDueDate] = useState(""); // Due date selection
+  const { filterStatus, setFilterStatus, filterCategory, setFilterCategory } = useTaskContext();
 
   return (
-    <div className="flex gap-4">
-      {/* Task Category Select */}
-      <Select onValueChange={(value) => setCategory(value)}>
-        <SelectTrigger className="rounded-full border border-gray-300 px-4 py-2">
-          <SelectValue defaultValue={category} placeholder="Category" />
-        </SelectTrigger>
-        <SelectContent className="bg-white border-0">
-          <SelectGroup>
-            <SelectItem value="work">Work</SelectItem>
-            <SelectItem value="personal">Personal</SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+    <div className="flex flex-wrap items-center gap-4">
+      <div className="flex items-center gap-2">
+        <span className="font-semibold">Status:</span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="px-3 py-1 rounded-full border border-border bg-popover text-foreground hover:bg-accent hover:text-accent-foreground transition">
+              {filterStatus}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="min-w-[10rem]">
+            {statuses.map((status) => (
+              <DropdownMenuItem
+                key={status}
+                onSelect={() => setFilterStatus(status)}
+                className={`rounded-sm ${filterStatus === status ? "bg-primary text-primary-foreground" : ""}`}
+              >
+                {status}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
-      {/* Due Date Select */}
-      <Select onValueChange={(value) => setDueDate(value)}>
-        <SelectTrigger className="rounded-full border border-gray-300 px-4 py-2">
-          <SelectValue defaultValue={dueDate} placeholder="Due Date" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectItem value="decide-later">Decide Later</SelectItem>
-            <SelectItem value="2024-12-30">30 Dec, 2024</SelectItem>
-            <SelectItem value="2024-12-31">31 Dec, 2024</SelectItem>
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      <div className="flex items-center gap-2">
+        <span className="font-semibold">Category:</span>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="px-3 py-1 rounded-full border border-border bg-popover text-foreground hover:bg-accent hover:text-accent-foreground transition">
+              {filterCategory}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="min-w-[10rem]">
+            {categories.map((category) => (
+              <DropdownMenuItem
+                key={category}
+                onSelect={() => setFilterCategory(category)}
+                className={`rounded-sm ${filterCategory === category ? "bg-primary text-primary-foreground" : ""}`}
+              >
+                {category}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
     </div>
   );
 }

@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Task Manager
 
-## Getting Started
+Minimal Next.js app with task CRUD and drag-drop workflow.
 
-First, run the development server:
+## Setup
+
+1. Install dependencies
+
+```bash
+npm install
+```
+
+2. Run local server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Visit
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`http://localhost:3000`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Local storage reset
 
-## Learn More
+In browser console:
 
-To learn more about Next.js, take a look at the following resources:
+```js
+localStorage.removeItem('taskbuddy_tasks')
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+or full clear:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```js
+localStorage.clear()
+```
 
-## Deploy on Vercel
+## What is implemented
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Next.js 15 app router (`app/`)
+- global state in `app/context/TaskContext.tsx`
+- persistence with `useLocalStorage`
+- UI components in `components/`
+- task operations: add, edit, delete, complete toggle
+- filter + search
+- colors + dark mode toggle
+- drag-drop via native HTML5 DnD (list + board views)
+- toasts with action context
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Notes
+
+- remove mock data from `data/tasks.ts` and set initial tasks to `[]` in `TaskContext`
+- keep consistent component-driven UI in `components/`
+- disable heavy linting from CI if local environment gives ENOPRO in container
